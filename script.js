@@ -1,6 +1,20 @@
-var url = "https://api.openweathermap.org/data/2.5/weather?q=Viborg&appid=415b10abfb32bd431f2017e24a855136"
 
-var promise = fetch(url)
+function getCity(){
+    var cityName = document.getElementById("inputField").value
+    var url = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=b10abfb32bd431f2017e24a855136&units=metric`
 
-var promise2 = promise.then(data=>data.text())
-promise2.then(data=>console.log(data))
+    var promise = fetch(url)
+
+    var promise2 = promise.then(data=>data.json())
+    promise2.then(data=>console.log(data))
+
+    promise2.then(data=>console.log(data.main.temp))
+}
+
+
+
+
+function displayResult(){
+    
+    document.getElementById("tempText").innerText = data.main.temp
+}
