@@ -9,12 +9,6 @@ function getCity(){
     promise2.then(data=>console.log(data))
 
     promise2.then(data=>console.log(data.main.temp))
-}
 
-
-
-
-function displayResult(){
     
-    document.getElementById("tempText").innerText = data.main.temp
 }
