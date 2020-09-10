@@ -1,7 +1,8 @@
 
 function getCity(){
     var cityName = document.getElementById("inputField").value;
-    var url = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=415b10abfb32bd431f2017e24a855136&units=metric`;
+    var apiKey = '415b10abfb32bd431f2017e24a855136'
+    var url = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${apiKey}&units=metric`;
 
     var promise = fetch(url);
 
@@ -24,7 +25,11 @@ function getCity2(){
 }
 
 function something(data){
-    document.getElementById("tempText").innerText = data.main.temp
+    document.getElementById("tempText2").innerText = data.main.temp
+    document.getElementById("weatherText2").innerText = data.weather[0].main
+    document.getElementById("countryText2").innerText = data.sys.country
+    var object = document.createElement("form")
+    object = document.forms['form']['formName'].value
 }
 
 function something2(data){
