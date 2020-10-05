@@ -7,8 +7,6 @@ function getCity(){
 
     var promise = fetch(url);
 
-    var promise2 = promise.then(data=>data.json());
-    promise2.then(data=>console.log(data));
 
     promise2.then(data=>something(data));
 
