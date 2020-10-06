@@ -10,10 +10,9 @@ function getPokemon(){
 
         var picURL = res.sprites.front_default;
         document.getElementById("picture").src = picURL
-
-        document.getElementById("name").innerText = "Name: " + res.species.name
-
+        var name = res.species.name
         
+        document.getElementById("name").innerText = "Name: " + name
 
         document.getElementById("type1").innerText = "Type 1: " + res.types[0].type.name
 
@@ -31,8 +30,4 @@ function getPokemon(){
         document.getElementById("speed").innerText = "Speed: " + res.stats[5].base_stat
         
     })
-}
-
-function capitalize(c){
-    return capitalize(c)
 }
