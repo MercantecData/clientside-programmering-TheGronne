@@ -201,7 +201,7 @@ function getPokemon() {
 }
 
 
-//Rener ud hvilke typer givende pokemon er weak, stærk og immun overfor
+//Regner ud hvilke typer givende pokemon er weak, stærk og immun overfor
 function calculateWeaknesses(type1, type2){
     var pokeName = document.getElementById("inputField").value;
 
@@ -248,12 +248,11 @@ function calculateWeaknesses(type1, type2){
                 }
             }
 
-            //Checks if type 1 has a weakness that ++++++++++++++   +½  type 2 is immune to
+            //Checks if type 1 has a weakness that type 2 is immune to
             if (t2i[0].length >= 1){
                 for(w = 0; w < res.damage_relations.double_damage_from.length; w++){
                     for(i = 0; i < res2.damage_relations.no_damage_from.length; i++){
                         if (res.damage_relations.double_damage_from[w].name == res2.damage_relations.no_damage_from[i].name){
-                            
                             t1w[0].splice(w,1)
                         }
                     }
@@ -264,8 +263,6 @@ function calculateWeaknesses(type1, type2){
             if (t2i[0].length >= 1){
                 for(r = 0; r < res.damage_relations.half_damage_from.length; r++){
                     for(i = 0; i < res2.damage_relations.no_damage_from.length; i++){
-                        console.log(res2.damage_relations.no_damage_from[i])
-                        console.log(res.damage_relations.half_damage_from[r])
                         if (res.damage_relations.half_damage_from[r].name == res2.damage_relations.no_damage_from[i].name){
                             t1r[0].splice(r,1)
                         }
@@ -298,6 +295,24 @@ function calculateWeaknesses(type1, type2){
             console.log(t2w)
 
 
+            calculateWeaknesses2(t1w,t1r,t1i,t2w,t2r,t2i, type1, type2)
+
+        })
+    })
+}
+
+function calculateWeaknesses2(t1w,t1r,t1i,t2w,t2r,t2i, type1 ,type2){
+
+    var url = `https://pokeapi.co/api/v2/type/${type1}/`;
+    var url2 = `https://pokeapi.co/api/v2/type/${type2}/`;
+
+    fetch(url).then(res => res.json()).then(res => {
+        console.log(res);
+
+        fetch(url2).then(res2 => res2.json()).then(res2 => {
+            console.log(res2);
+            
+        
             //Creates lists to use as the output for the user
             var doubleWeakList = []
             var quadWeakList = []
@@ -305,6 +320,25 @@ function calculateWeaknesses(type1, type2){
             var doubleResistList = []
             var quadResistList = []
 
+            
+            for(w = 0; w < res.damage_relations.double_damage_from.length; w++){
+                for(i = 0; i < res2.damage_relations.double_damage_from.length; i++){
+                    if (res.damage_relations.double_damage_from[w].name == res2.damage_relations.double_damage_from[i].name){
+                        quadWeakList.push("4x weak to: " + res.damage_relations.double_damage_from[w].name)
+
+                    }
+                }
+            }
+            
+            for(w = 0; w < res.damage_relations.half_damage_from.length; w++){
+                for(i = 0; i < res2.damage_relations.half_damage_from.length; i++){
+                    if (res.damage_relations.half_damage_from[w].name == res2.damage_relations.half_damage_from[i].name){
+                        quadWeakList.push("4x resist to: " + res.damage_relations.half_damage_from[w].name)
+                    }
+                }
+            }
+            
+            /*
             //Checks if both types have a common weakness
             for(i = 0; i < t1w[0].length; i++){
                 for(u = 0; u < t2w[0].length; u++){
@@ -314,9 +348,9 @@ function calculateWeaknesses(type1, type2){
                         t2w[0].splice(u,1)
                     }
                 }
-            }
+            }*/
 
-            //Adds weaknesses form type 1 to the list
+            //Adds weaknesses from type 1 to the list
             for(i = 0; i < t1w[0].length; i++){
                 doubleWeakList.push("2x weak to: " + t1w[0][i].name)
             }
@@ -324,14 +358,8 @@ function calculateWeaknesses(type1, type2){
             for(i = 0; i< t2w[0].length; i++){
                 doubleWeakList.push("2x weak to: " + t2w[0][i].name)
             }
-
-            for(i = 0; i < doubleWeakList.length; i++){
-                console.log(doubleWeakList[i])
-            }
-            for(i = 0; i < quadWeakList.length; i++){
-                console.log(quadWeakList[i])
-            }
-
+            /*
+            //Checks if both types resists something
             for(i = 0; i < t1r[0].length; i++){
                 for(u = 0; u < t2r[0].length; u++){
                     if (t1r[0][i].name == t2r[0][u].name){
@@ -340,7 +368,7 @@ function calculateWeaknesses(type1, type2){
                         t2r[0].splice(u,1)
                     }
                 }
-            }
+            } */
 
             //Adds resists form type 1 to the list
             for(i = 0; i < t1r[0].length; i++){
@@ -349,13 +377,6 @@ function calculateWeaknesses(type1, type2){
             //Same for type 2
             for(i = 0; i < t2r[0].length; i++){
                 doubleResistList.push("2x resist to: " + t2r[0][i].name)
-            }
-
-            for(i = 0; i < doubleResistList.length; i++){
-                console.log(doubleResistList[i])
-            }
-            for(i = 0; i < quadResistList.length; i++){
-                console.log(quadResistList[i])
             }
 
             for(i = 0; i < t1i[0].length; i++){
@@ -373,6 +394,62 @@ function calculateWeaknesses(type1, type2){
             for(i = 0; i < doubleWeakList.length; i++){
                 var entry = document.createElement("LI")
                 var label = document.createTextNode(`${doubleWeakList[i]}`)
+                switch (label.textContent) {
+                    case "2x weak to: psychic":
+                        entry.setAttribute('class', 'psychic')
+                        break;
+                    case "2x weak to: ghost":
+                        entry.setAttribute('class', 'ghost')
+                        break;
+                    case "2x weak to: dark":
+                        entry.setAttribute('class', 'dark')
+                        break;
+                    case "2x weak to: fairy":
+                        entry.setAttribute('class', 'fairy')
+                        break;
+                    case "2x weak to: dragon":
+                        entry.setAttribute('class', 'dragon')
+                        break;
+                    case "2x weak to: steel":
+                        entry.setAttribute('class', 'steel')
+                        break;
+                    case "2x weak to: rock":
+                        entry.setAttribute('class', 'rock')
+                        break;
+                    case "2x weak to: ground":
+                        entry.setAttribute('class', 'ground')
+                        break;
+                    case "2x weak to: flying":
+                        entry.setAttribute('class', 'flying')
+                        break;
+                    case "2x weak to: electric":
+                        entry.setAttribute('class', 'electric')
+                        break;
+                    case "2x weak to: water":
+                        entry.setAttribute('class', 'water')
+                        break;
+                    case "2x weak to: fire":
+                        entry.setAttribute('class', 'fire')
+                        break;
+                    case "2x weak to: grass":
+                        entry.setAttribute('class', 'grass')
+                        break;
+                    case "2x weak to: normal":
+                        entry.setAttribute('class', 'normal')
+                        break;
+                    case "2x weak to: fighting":
+                        entry.setAttribute('class', 'fighting')
+                        break;
+                    case "2x weak to: poison":
+                        entry.setAttribute('class', 'poison')
+                        break;
+                    case "2x weak to: ice":
+                        entry.setAttribute('class', 'ice')
+                        break;
+                    case "2x weak to: bug":
+                        entry.setAttribute('class', 'bug')
+                        break;
+                }
                 entry.appendChild(label)
                 document.getElementById("weaknessList").appendChild(entry)
             }
@@ -380,6 +457,62 @@ function calculateWeaknesses(type1, type2){
             for(i = 0; i < quadWeakList.length; i++){
                 var entry = document.createElement("LI")
                 var label = document.createTextNode(`${quadWeakList[i]}`)
+                switch (label.textContent) {
+                    case "4x weak to: psychic":
+                        entry.setAttribute('class', 'psychic')
+                        break;
+                    case "4x weak to: ghost":
+                        entry.setAttribute('class', 'ghost')
+                        break;
+                    case "4x weak to: dark":
+                        entry.setAttribute('class', 'dark')
+                        break;
+                    case "4x weak to: fairy":
+                        entry.setAttribute('class', 'fairy')
+                        break;
+                    case "4x weak to: dragon":
+                        entry.setAttribute('class', 'dragon')
+                        break;
+                    case "4x weak to: steel":
+                        entry.setAttribute('class', 'steel')
+                        break;
+                    case "4x weak to: rock":
+                        entry.setAttribute('class', 'rock')
+                        break;
+                    case "4x weak to: ground":
+                        entry.setAttribute('class', 'ground')
+                        break;
+                    case "4x weak to: flying":
+                        entry.setAttribute('class', 'flying')
+                        break;
+                    case "4x weak to: electric":
+                        entry.setAttribute('class', 'electric')
+                        break;
+                    case "4x weak to: water":
+                        entry.setAttribute('class', 'water')
+                        break;
+                    case "4x weak to: fire":
+                        entry.setAttribute('class', 'fire')
+                        break;
+                    case "4x weak to: grass":
+                        entry.setAttribute('class', 'grass')
+                        break;
+                    case "4x weak to: normal":
+                        entry.setAttribute('class', 'normal')
+                        break;
+                    case "4x weak to: fighting":
+                        entry.setAttribute('class', 'fighting')
+                        break;
+                    case "4x weak to: poison":
+                        entry.setAttribute('class', 'poison')
+                        break;
+                    case "4x weak to: ice":
+                        entry.setAttribute('class', 'ice')
+                        break;
+                    case "4x weak to: bug":
+                        entry.setAttribute('class', 'bug')
+                        break;
+                }
                 entry.appendChild(label)
                 document.getElementById("weaknessList").appendChild(entry)
             }
@@ -387,6 +520,62 @@ function calculateWeaknesses(type1, type2){
             for(i = 0; i < doubleResistList.length; i++){
                 var entry = document.createElement("LI")
                 var label = document.createTextNode(`${doubleResistList[i]}`)
+                switch (label.textContent) {
+                    case "2x resist to: psychic":
+                        entry.setAttribute('class', 'psychic')
+                        break;
+                    case "2x resist to: ghost":
+                        entry.setAttribute('class', 'ghost')
+                        break;
+                    case "2x resist to: dark":
+                        entry.setAttribute('class', 'dark')
+                        break;
+                    case "2x resist to: fairy":
+                        entry.setAttribute('class', 'fairy')
+                        break;
+                    case "2x resist to: dragon":
+                        entry.setAttribute('class', 'dragon')
+                        break;
+                    case "2x resist to: steel":
+                        entry.setAttribute('class', 'steel')
+                        break;
+                    case "2x resist to: rock":
+                        entry.setAttribute('class', 'rock')
+                        break;
+                    case "2x resist to: ground":
+                        entry.setAttribute('class', 'ground')
+                        break;
+                    case "2x resist to: flying":
+                        entry.setAttribute('class', 'flying')
+                        break;
+                    case "2x resist to: electric":
+                        entry.setAttribute('class', 'electric')
+                        break;
+                    case "2x resist to: water":
+                        entry.setAttribute('class', 'water')
+                        break;
+                    case "2x resist to: fire":
+                        entry.setAttribute('class', 'fire')
+                        break;
+                    case "2x resist to: grass":
+                        entry.setAttribute('class', 'grass')
+                        break;
+                    case "2x resist to: normal":
+                        entry.setAttribute('class', 'normal')
+                        break;
+                    case "2x resist to: fighting":
+                        entry.setAttribute('class', 'fighting')
+                        break;
+                    case "2x resist to: poison":
+                        entry.setAttribute('class', 'poison')
+                        break;
+                    case "2x resist to: ice":
+                        entry.setAttribute('class', 'ice')
+                        break;
+                    case "2x resist to: bug":
+                        entry.setAttribute('class', 'bug')
+                        break;
+                }
                 entry.appendChild(label)
                 document.getElementById("resistList").appendChild(entry)
             }
@@ -394,6 +583,62 @@ function calculateWeaknesses(type1, type2){
             for(i = 0; i < quadResistList.length; i++){
                 var entry = document.createElement("LI")
                 var label = document.createTextNode(`${quadResistList[i]}`)
+                switch (label.textContent) {
+                    case "4x resist to: psychic":
+                        entry.setAttribute('class', 'psychic')
+                        break;
+                    case "4x resist to: ghost":
+                        entry.setAttribute('class', 'ghost')
+                        break;
+                    case "4x resist to: dark":
+                        entry.setAttribute('class', 'dark')
+                        break;
+                    case "4x resist to: fairy":
+                        entry.setAttribute('class', 'fairy')
+                        break;
+                    case "4x resist to: dragon":
+                        entry.setAttribute('class', 'dragon')
+                        break;
+                    case "4x resist to: steel":
+                        entry.setAttribute('class', 'steel')
+                        break;
+                    case "4x resist to: rock":
+                        entry.setAttribute('class', 'rock')
+                        break;
+                    case "4x resist to: ground":
+                        entry.setAttribute('class', 'ground')
+                        break;
+                    case "4x resist to: flying":
+                        entry.setAttribute('class', 'flying')
+                        break;
+                    case "4x resist to: electric":
+                        entry.setAttribute('class', 'electric')
+                        break;
+                    case "4x resist to: water":
+                        entry.setAttribute('class', 'water')
+                        break;
+                    case "4x resist to: fire":
+                        entry.setAttribute('class', 'fire')
+                        break;
+                    case "4x resist to: grass":
+                        entry.setAttribute('class', 'grass')
+                        break;
+                    case "4x resist to: normal":
+                        entry.setAttribute('class', 'normal')
+                        break;
+                    case "4x resist to: fighting":
+                        entry.setAttribute('class', 'fighting')
+                        break;
+                    case "4x resist to: poison":
+                        entry.setAttribute('class', 'poison')
+                        break;
+                    case "4x resist to: ice":
+                        entry.setAttribute('class', 'ice')
+                        break;
+                    case "4x resist to: bug":
+                        entry.setAttribute('class', 'bug')
+                        break;
+                }
                 entry.appendChild(label)
                 document.getElementById("resistList").appendChild(entry)
             }
@@ -462,7 +707,6 @@ function calculateWeaknesses(type1, type2){
                 document.getElementById("immuneList").appendChild(entry)
 
             }
-
         })
     })
 }
