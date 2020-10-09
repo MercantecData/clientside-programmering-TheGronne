@@ -53,3 +53,21 @@
 .electric{
     color: yellow
 }
+.hp{
+    color: red
+}
+.atk{
+    color: orange
+}
+.def{
+    Color: C71585
+}
+.spatk{
+    color: cornflowerblue;
+}
+.spdef{
+    color: lightgreen
+}
+.speed{
+    color: pink
+}

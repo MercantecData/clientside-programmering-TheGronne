@@ -180,6 +180,289 @@ function getPokemon() {
         document.getElementById("specialDefense").innerText = "Special Defense: " + res.stats[4].base_stat
         document.getElementById("speed").innerText = "Speed: " + res.stats[5].base_stat
 
-    })
+        document.getElementById("hp").setAttribute('class','hp')
+        document.getElementById("attack").setAttribute('class', 'atk')
+        document.getElementById("defense").setAttribute('class','def')
+        document.getElementById("specialAttack").setAttribute('class','spatk')
+        document.getElementById("specialDefense").setAttribute('class', 'spdef')
+        document.getElementById("speed").setAttribute('class','speed')
 
+        var randomNumber = Math.floor(Math.random() * 30) + 1;
+        console.log(randomNumber);
+        var url2 = `https://pokeapi.co/api/v2/characteristic/${randomNumber}/`
+
+        fetch(url2).then(res2 => res2.json()).then(res2 => {
+            console.log(res2);
+
+            document.getElementById("description").innerHTML = res2.descriptions[2].description
+        })
+        calculateWeaknesses(res.types[0].type.name, res.types[1].type.name)
+    })
+}
+
+
+//Rener ud hvilke typer givende pokemon er weak, stærk og immun overfor
+function calculateWeaknesses(type1, type2){
+    var pokeName = document.getElementById("inputField").value;
+
+    //Poke type API for each type the pokemon has
+    var url = `https://pokeapi.co/api/v2/type/${type1}/`;
+    var url2 = `https://pokeapi.co/api/v2/type/${type2}/`;
+
+    fetch(url).then(res => res.json()).then(res => {
+        console.log(res);
+
+        fetch(url2).then(res2 => res2.json()).then(res2 => {
+            console.log(res2);
+            
+            //Creates copies of the arrays it retrieves from the API
+            var t1r = [res.damage_relations.half_damage_from]
+
+            var t1w = [res.damage_relations.double_damage_from]
+
+            var t2r = [res2.damage_relations.half_damage_from]
+
+            var t2w = [res2.damage_relations.double_damage_from]
+
+            var t1i = [res.damage_relations.no_damage_from]
+
+            var t2i = [res2.damage_relations.no_damage_from]
+
+            //Checks if type 1 takes double damage from something that type 2 receives ½ damage from
+            for(w = 0; w < res.damage_relations.double_damage_from.length; w++){
+                for(r = 0; r < res2.damage_relations.half_damage_from.length; r++){
+                    if (res.damage_relations.double_damage_from[w].name == res2.damage_relations.half_damage_from[r].name){
+                        t1w[0].splice(w,1)
+                        t2r[0].splice(r,1) 
+                    }
+                }
+            }
+
+            //Same but reverse
+            for(r = 0; r < res.damage_relations.half_damage_from.length; r++){
+                for(w = 0; w < res2.damage_relations.double_damage_from.length; w++){
+                    if (res.damage_relations.half_damage_from[r].name == res2.damage_relations.double_damage_from[w].name){
+                        t1r[0].splice(r,1)
+                        t2w[0].splice(w,1)
+                    }
+                }
+            }
+
+            //Checks if type 1 has a weakness that ++++++++++++++   +½  type 2 is immune to
+            if (t2i[0].length >= 1){
+                for(w = 0; w < res.damage_relations.double_damage_from.length; w++){
+                    for(i = 0; i < res2.damage_relations.no_damage_from.length; i++){
+                        if (res.damage_relations.double_damage_from[w].name == res2.damage_relations.no_damage_from[i].name){
+                            
+                            t1w[0].splice(w,1)
+                        }
+                    }
+                }
+            }
+
+            //Checks if type 1 resists a type that type 2 is immune to
+            if (t2i[0].length >= 1){
+                for(r = 0; r < res.damage_relations.half_damage_from.length; r++){
+                    for(i = 0; i < res2.damage_relations.no_damage_from.length; i++){
+                        console.log(res2.damage_relations.no_damage_from[i])
+                        console.log(res.damage_relations.half_damage_from[r])
+                        if (res.damage_relations.half_damage_from[r].name == res2.damage_relations.no_damage_from[i].name){
+                            t1r[0].splice(r,1)
+                        }
+                    }
+                }
+            }
+
+            //Same but reversed
+            if (t1i[0].length >= 1){
+                for(r = 0; r < res2.damage_relations.half_damage_from.length; r++){
+                    for(i = 0; i < res.damage_relations.no_damage_from.length; i++){
+                        if (res2.damage_relations.half_damage_from[r].name == res.damage_relations.no_damage_from[i].name){
+                            t2r[0].splice(r,1)
+                        }
+                    }
+                }
+            }
+
+            //Same but reversed
+            if (t1i[0].length >= 1){
+                for(w = 0; w < res2.damage_relations.double_damage_from.length; w++){
+                    for(i = 0; i < res.damage_relations.no_damage_from.length; i++){
+                        if (res2.damage_relations.double_damage_from[w].name == res.damage_relations.no_damage_from[i].name){
+                            t2w[0].splice(w,1)
+                        }
+                    }
+                }
+            }
+            console.log(t1w)
+            console.log(t2w)
+
+
+            //Creates lists to use as the output for the user
+            var doubleWeakList = []
+            var quadWeakList = []
+            var immuneList = []
+            var doubleResistList = []
+            var quadResistList = []
+
+            //Checks if both types have a common weakness
+            for(i = 0; i < t1w[0].length; i++){
+                for(u = 0; u < t2w[0].length; u++){
+                    if (t1w[0][i].name == t2w[0][u].name){
+                        quadWeakList.push("4x weak to: " + t1w[0][i].name)
+                        t1w[0].splice(i,1)
+                        t2w[0].splice(u,1)
+                    }
+                }
+            }
+
+            //Adds weaknesses form type 1 to the list
+            for(i = 0; i < t1w[0].length; i++){
+                doubleWeakList.push("2x weak to: " + t1w[0][i].name)
+            }
+            //Same for type 2
+            for(i = 0; i< t2w[0].length; i++){
+                doubleWeakList.push("2x weak to: " + t2w[0][i].name)
+            }
+
+            for(i = 0; i < doubleWeakList.length; i++){
+                console.log(doubleWeakList[i])
+            }
+            for(i = 0; i < quadWeakList.length; i++){
+                console.log(quadWeakList[i])
+            }
+
+            for(i = 0; i < t1r[0].length; i++){
+                for(u = 0; u < t2r[0].length; u++){
+                    if (t1r[0][i].name == t2r[0][u].name){
+                        quadResistList.push("4x resist to: " + t1r[0][i].name)
+                        t1r[0].splice(i,1)
+                        t2r[0].splice(u,1)
+                    }
+                }
+            }
+
+            //Adds resists form type 1 to the list
+            for(i = 0; i < t1r[0].length; i++){
+                doubleResistList.push("2x resist to: " + t1r[0][i].name)
+            }
+            //Same for type 2
+            for(i = 0; i < t2r[0].length; i++){
+                doubleResistList.push("2x resist to: " + t2r[0][i].name)
+            }
+
+            for(i = 0; i < doubleResistList.length; i++){
+                console.log(doubleResistList[i])
+            }
+            for(i = 0; i < quadResistList.length; i++){
+                console.log(quadResistList[i])
+            }
+
+            for(i = 0; i < t1i[0].length; i++){
+                immuneList.push("Immune to: " + t1i[0][i].name)
+            }
+
+            for(i = 0; i < t2i[0].length; i++){
+                immuneList.push("Immune to: " + t2i[0][i].name)
+            }
+
+            document.getElementById("listTitle").innerText = "Weaknesses: "
+            document.getElementById("listTitle2").innerText = "Resistances: "
+            document.getElementById("listTitle3").innerText = "Immunities: "
+
+            for(i = 0; i < doubleWeakList.length; i++){
+                var entry = document.createElement("LI")
+                var label = document.createTextNode(`${doubleWeakList[i]}`)
+                entry.appendChild(label)
+                document.getElementById("weaknessList").appendChild(entry)
+            }
+            
+            for(i = 0; i < quadWeakList.length; i++){
+                var entry = document.createElement("LI")
+                var label = document.createTextNode(`${quadWeakList[i]}`)
+                entry.appendChild(label)
+                document.getElementById("weaknessList").appendChild(entry)
+            }
+
+            for(i = 0; i < doubleResistList.length; i++){
+                var entry = document.createElement("LI")
+                var label = document.createTextNode(`${doubleResistList[i]}`)
+                entry.appendChild(label)
+                document.getElementById("resistList").appendChild(entry)
+            }
+
+            for(i = 0; i < quadResistList.length; i++){
+                var entry = document.createElement("LI")
+                var label = document.createTextNode(`${quadResistList[i]}`)
+                entry.appendChild(label)
+                document.getElementById("resistList").appendChild(entry)
+            }
+
+            for(i = 0; i < immuneList.length; i++){
+                var entry = document.createElement("LI")
+                var label = document.createTextNode(`${immuneList[i]}`)
+
+                switch (label.textContent) {
+                    case "Immune to: psychic":
+                        entry.setAttribute('class', 'psychic')
+                        break;
+                    case "Immune to: ghost":
+                        entry.setAttribute('class', 'ghost')
+                        break;
+                    case "Immune to: dark":
+                        entry.setAttribute('class', 'dark')
+                        break;
+                    case "Immune to: fairy":
+                        entry.setAttribute('class', 'fairy')
+                        break;
+                    case "Immune to: dragon":
+                        entry.setAttribute('class', 'dragon')
+                        break;
+                    case "Immune to: steel":
+                        entry.setAttribute('class', 'steel')
+                        break;
+                    case "Immune to: rock":
+                        entry.setAttribute('class', 'rock')
+                        break;
+                    case "Immune to: ground":
+                        entry.setAttribute('class', 'ground')
+                        break;
+                    case "Immune to: flying":
+                        entry.setAttribute('class', 'flying')
+                        break;
+                    case "Immune to: electric":
+                        entry.setAttribute('class', 'electric')
+                        break;
+                    case "Immune to: water":
+                        entry.setAttribute('class', 'water')
+                        break;
+                    case "Immune to: fire":
+                        entry.setAttribute('class', 'fire')
+                        break;
+                    case "Immune to: grass":
+                        entry.setAttribute('class', 'grass')
+                        break;
+                    case "Immune to: normal":
+                        entry.setAttribute('class', 'normal')
+                        break;
+                    case "Immune to: fighting":
+                        entry.setAttribute('class', 'fighting')
+                        break;
+                    case "Immune to: poison":
+                        entry.setAttribute('class', 'poison')
+                        break;
+                    case "Immune to: ice":
+                        entry.setAttribute('class', 'ice')
+                        break;
+                    case "Immune to: bug":
+                        entry.setAttribute('class', 'bug')
+                        break;
+                }
+                entry.appendChild(label)
+                document.getElementById("immuneList").appendChild(entry)
+
+            }
+
+        })
+    })
 }
